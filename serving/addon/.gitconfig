@@ -1,0 +1,12 @@
+[alias]
+    co = checkout
+    br = branch
+    ci = commit
+    st = status
+    unstage = reset HEAD --
+
+[user]
+        name = Functional-Account
+        email = arrking_fn@163.com
+[url "git@github.com:"]
+       insteadOf = https://github.com/

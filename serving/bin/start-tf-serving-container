@@ -1,0 +1,14 @@
+#! /bin/bash 
+###########################################
+# Start TensorFlow Serving Container
+###########################################
+
+# constants
+baseDir=$(cd `dirname "$0"`;pwd)
+containerName=tf_serving
+# functions
+
+# main 
+[ -z "${BASH_SOURCE[0]}" -o "${BASH_SOURCE[0]}" = "$0" ] || return
+cd $baseDir/..
+docker run  --name  $containerName -dit -v $baseDir/../addon:/addon -p 6666:6666 samurais/tensorflow-serving:v1.0.0

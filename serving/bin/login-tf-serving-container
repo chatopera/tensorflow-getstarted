@@ -1,0 +1,13 @@
+#! /bin/bash 
+###########################################
+# Login tf serving container
+###########################################
+
+# constants
+baseDir=$(cd `dirname "$0"`;pwd)
+containerName=tf_serving
+# functions
+
+# main 
+[ -z "${BASH_SOURCE[0]}" -o "${BASH_SOURCE[0]}" = "$0" ] || return
+docker exec -it $containerName /bin/bash
