@@ -1,0 +1,16 @@
+#! /bin/bash 
+###########################################
+# Sync Files to neuron server.
+###########################################
+
+# constants
+baseDir=$(cd `dirname "$0"`;pwd)
+remotePath="hain@neuron:git"
+
+# functions
+
+# main 
+[ -z "${BASH_SOURCE[0]}" -o "${BASH_SOURCE[0]}" = "$0" ] || return
+cd $baseDir/..
+rsync -av --exclude ".*" \
+    `pwd` $remotePath
