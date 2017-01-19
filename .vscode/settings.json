@@ -1,0 +1,16 @@
+{
+    "python.linting.enabled": true,
+    "editor.rulers": [
+        80,
+        100
+    ],
+    "python.pythonPath": "/Users/hain/venv-py3/bin/python",
+    "python.autoComplete.extraPaths":[
+        "/Users/hain/venv-py3/lib/python3.5",
+        "/Users/hain/venv-py3/lib/python3.5/site-packages"
+    ],
+    "python.formatting.provider": "autopep8",
+    "files.exclude": {
+        "**/*.pyc": true
+    }
+}
