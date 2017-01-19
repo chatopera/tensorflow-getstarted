@@ -34,10 +34,13 @@ tf.set_random_seed(0)
 #              softmax(line) applies an exp to each value then divides by the norm of the resulting line
 #              Y: output matrix with 100 lines and 10 columns
 
-# Download images and labels into mnist.test (10K images+labels) and mnist.train (60K images+labels)
-mnist = read_data_sets("MNIST_data", one_hot=True, reshape=False, validation_size=0)
+# Download images and labels into mnist.test (10K images+labels) and
+# mnist.train (60K images+labels)
+mnist = read_data_sets("MNIST_data", one_hot=True,
+                       reshape=False, validation_size=0)
 
-# input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
+# input X: 28x28 grayscale images, the first dimension (None) will index
+# the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 28, 28, 1])
 # correct answers will go here
 Y_ = tf.placeholder(tf.float32, [None, 10])
@@ -61,8 +64,9 @@ Y = tf.nn.softmax(tf.matmul(XX, W) + b)
 # log takes the log of each element, * multiplies the tensors element by element
 # reduce_mean will add all the components in the tensor
 # so here we end up with the total cross-entropy for all images in the batch
-cross_entropy = -tf.reduce_mean(Y_ * tf.log(Y)) * 1000.0  # normalized for batches of 100 images,
-                                                          # *10 because  "mean" included an unwanted division by 10
+# normalized for batches of 100 images,
+cross_entropy = -tf.reduce_mean(Y_ * tf.log(Y)) * 1000.0
+# *10 because  "mean" included an unwanted division by 10
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
@@ -71,44 +75,37 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 # training, learning rate = 0.005
 train_step = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy)
 
-# matplotlib visualisation
-allweights = tf.reshape(W, [-1])
-allbiases = tf.reshape(b, [-1])
-
 # init
 init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
 
-# You can call this function in a loop to train the model, 100 images at a time
 def training_step(i, update_test_data, update_train_data):
-
+    '''
+    You can call this function in a loop to train the model, 100 images at a time
+    '''
     # training on batches of 100 images with 100 labels
     batch_X, batch_Y = mnist.train.next_batch(100)
 
-    # compute training values for visualisation
+    # compute training values
     if update_train_data:
-        a, c, w, b = sess.run([accuracy, cross_entropy, allweights, allbiases], feed_dict={X: batch_X, Y_: batch_Y})
+        a, c = sess.run([accuracy, cross_entropy], feed_dict={
+                              X: batch_X, Y_: batch_Y})
         print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
-    # compute test values for visualisation
+    # compute test value
     if update_test_data:
-        a, c = sess.run([accuracy, cross_entropy], feed_dict={X: mnist.test.images, Y_: mnist.test.labels})
-        print(str(i) + ": ********* epoch " + str(i*100//mnist.train.images.shape[0]+1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
+        a, c = sess.run([accuracy, cross_entropy], feed_dict={
+                        X: mnist.test.images, Y_: mnist.test.labels})
+        print(str(i) + ": ********* epoch " + str(i * 100 // mnist.train.images.shape[
+              0] + 1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
 
     # the backpropagation training step
     sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
 
-# datavis.animate(training_step, iterations=2000+1, train_data_update_freq=10, test_data_update_freq=50, more_tests_at_start=True)
-
 def main():
     for k in range(20000):
-        training_step(k+1, True, True)
+        training_step(k + 1, True, True)
 
 if __name__ == '__main__':
     main()
-    # to save the animation as a movie, add save_movie=True as an argument to datavis.animate
-    # to disable the visualisation use the following line instead of the datavis.animate line
-    # for i in range(2000+1): training_step(i, i % 50 == 0, i % 10 == 0)
-
-    # final max test accuracy = 0.9268 (10K iterations). Accuracy should peak above 0.92 in the first 2000 iterations.
