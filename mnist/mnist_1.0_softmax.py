@@ -66,19 +66,26 @@ Y = tf.nn.softmax(tf.matmul(XX, W) + b)
 # so here we end up with the total cross-entropy for all images in the batch
 # normalized for batches of 100 images,
 cross_entropy = -tf.reduce_mean(Y_ * tf.log(Y)) * 1000.0
+tf.scalar_summary('loss', cross_entropy)  # Keep track of the cost
 # *10 because  "mean" included an unwanted division by 10
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+tf.scalar_summary('accuracy', accuracy)  # Keep track of the cost
 
 # training, learning rate = 0.005
 train_step = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy)
 
 # init
+tf_writer = tf.train.SummaryWriter('./save')
+tf_saver = tf.train.Saver(max_to_keep=200) # Arbitrary limit
 init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
+
+merged_summaries = tf.merge_all_summaries()
+tf_writer.add_graph(sess.graph) 
 
 def training_step(i, update_test_data, update_train_data):
     '''
@@ -89,8 +96,8 @@ def training_step(i, update_test_data, update_train_data):
 
     # compute training values
     if update_train_data:
-        a, c = sess.run([accuracy, cross_entropy], feed_dict={
-                              X: batch_X, Y_: batch_Y})
+        a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], feed_dict= { X: batch_X, Y_: batch_Y})
+        tf_writer.add_summary(s, i)
         print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
     # compute test value
@@ -104,8 +111,9 @@ def training_step(i, update_test_data, update_train_data):
     sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
 
 def main():
-    for k in range(20000):
+    for k in range(2000):
         training_step(k + 1, True, True)
+    tf_saver.save(sess, './save/model.ckpt')
 
 if __name__ == '__main__':
     main()
