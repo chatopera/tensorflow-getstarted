@@ -87,7 +87,7 @@ sess.run(init)
 merged_summaries = tf.merge_all_summaries()
 tf_writer.add_graph(sess.graph) 
 
-def training_step(i, update_test_data, update_train_data):
+def run(i, update_test_data, update_train_data):
     '''
     You can call this function in a loop to train the model, 100 images at a time
     '''
@@ -96,7 +96,7 @@ def training_step(i, update_test_data, update_train_data):
 
     # compute training values
     if update_train_data:
-        a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], feed_dict= { X: batch_X, Y_: batch_Y})
+        a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], feed_dict= {X: batch_X, Y_: batch_Y})
         tf_writer.add_summary(s, i)
         print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
@@ -112,7 +112,7 @@ def training_step(i, update_test_data, update_train_data):
 
 def main():
     for k in range(2000):
-        training_step(k + 1, True, True)
+        run(k + 1, True, True)
     tf_saver.save(sess, './save/model.ckpt')
 
 if __name__ == '__main__':
