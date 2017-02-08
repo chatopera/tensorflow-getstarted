@@ -16,6 +16,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import math
 import tensorflow as tf
 from tqdm import tqdm
 from utils import gen_model_save_dir
@@ -45,6 +46,8 @@ mnist = read_data_sets("MNIST_data", one_hot=True,
 X = tf.placeholder(tf.float32, [None, 28, 28, 1])
 # correct answers will go here
 Y_ = tf.placeholder(tf.float32, [None, 10])
+# variable learning rate
+lr = tf.placeholder(tf.float32)
 
 # five layers and their number of neurons (tha last layer has 10 softmax
 # neurons)
@@ -68,10 +71,10 @@ B5 = tf.Variable(tf.zeros([10]))
 
 # The model
 XX = tf.reshape(X, [-1, 784])
-Y1 = tf.nn.sigmoid(tf.matmul(XX, W1) + B1)
-Y2 = tf.nn.sigmoid(tf.matmul(Y1, W2) + B2)
-Y3 = tf.nn.sigmoid(tf.matmul(Y2, W3) + B3)
-Y4 = tf.nn.sigmoid(tf.matmul(Y3, W4) + B4)
+Y1 = tf.nn.relu(tf.matmul(XX, W1) + B1)
+Y2 = tf.nn.relu(tf.matmul(Y1, W2) + B2)
+Y3 = tf.nn.relu(tf.matmul(Y2, W3) + B3)
+Y4 = tf.nn.relu(tf.matmul(Y3, W4) + B4)
 Ylogits = tf.matmul(Y4, W5) + B5
 Y = tf.nn.softmax(Ylogits)
 
@@ -89,11 +92,10 @@ accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
 tf.scalar_summary('accuracy', accuracy)
 
 # training step, learning rate = 0.003
-learning_rate = 0.003
-train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
+train_step = tf.train.AdamOptimizer(lr).minimize(cross_entropy)
 
 # init
-model_save_dir = gen_model_save_dir(prefix='2_five_layers_sigmoid')
+model_save_dir = gen_model_save_dir(prefix='2_five_layers_relu_lrdecay')
 tf_writer = tf.train.SummaryWriter(model_save_dir)
 tf_saver = tf.train.Saver(max_to_keep=200)  # Arbitrary limit
 init = tf.initialize_all_variables()
@@ -110,6 +112,12 @@ def run(i, update_test_data, update_train_data):
     '''
     # training on batches of 100 images with 100 labels
     batch_X, batch_Y = mnist.train.next_batch(100)
+
+    # learning rate decay
+    max_learning_rate = 0.003
+    min_learning_rate = 0.0001
+    decay_speed = 2000.0 # 0.003-0.0001-2000=>0.9826 done in 5000 iterations
+    learning_rate = min_learning_rate + (max_learning_rate - min_learning_rate) * math.exp(-i/decay_speed)
 
     # compute training values for visualisation
     if update_train_data:
@@ -128,7 +136,7 @@ def run(i, update_test_data, update_train_data):
         # c, test loss
 
     # the backpropagation training step
-    sess.run(train_step, {X: batch_X, Y_: batch_Y})
+    sess.run(train_step, {X: batch_X, Y_: batch_Y, lr: learning_rate})
 
 
 def main():
