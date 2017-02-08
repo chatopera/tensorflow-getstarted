@@ -95,7 +95,7 @@ tf.scalar_summary('accuracy', accuracy)
 train_step = tf.train.AdamOptimizer(lr).minimize(cross_entropy)
 
 # init
-model_save_dir = gen_model_save_dir(prefix='2_five_layers_relu_lrdecay')
+model_save_dir = gen_model_save_dir(prefix='2.1_five_layers_relu_lrdecay')
 tf_writer = tf.train.SummaryWriter(model_save_dir)
 tf_saver = tf.train.Saver(max_to_keep=200)  # Arbitrary limit
 init = tf.initialize_all_variables()

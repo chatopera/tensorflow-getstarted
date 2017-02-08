@@ -93,7 +93,7 @@ learning_rate = 0.003
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
 # init
-model_save_dir = gen_model_save_dir(prefix='2_five_layers_sigmoid')
+model_save_dir = gen_model_save_dir(prefix='2.0_five_layers_sigmoid')
 tf_writer = tf.train.SummaryWriter(model_save_dir)
 tf_saver = tf.train.Saver(max_to_keep=200)  # Arbitrary limit
 init = tf.initialize_all_variables()
