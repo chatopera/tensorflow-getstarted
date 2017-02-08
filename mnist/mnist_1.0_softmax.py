@@ -77,7 +77,7 @@ tf.scalar_summary('loss', cross_entropy)  # Keep track of the cost
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
-tf.scalar_summary('accuracy', accuracy)  # Keep track of the cost
+tf.scalar_summary('accuracy', accuracy)  # Keep track of the accuracy
 
 # training, learning rate = 0.005
 train_step = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy)

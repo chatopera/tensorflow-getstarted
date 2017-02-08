@@ -25,5 +25,6 @@ function start_tensorboard(){
 
 # main 
 [ -z "${BASH_SOURCE[0]}" -o "${BASH_SOURCE[0]}" = "$0" ] || return
+set -x
 generate_logdir
 start_tensorboard

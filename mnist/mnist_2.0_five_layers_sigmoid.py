@@ -17,6 +17,7 @@
 # limitations under the License.
 
 import tensorflow as tf
+from utils import gen_model_save_dir
 from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 tf.set_random_seed(0)
 
@@ -79,22 +80,31 @@ Y = tf.nn.softmax(Ylogits)
 cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
     logits=Ylogits, labels=Y_)
 cross_entropy = tf.reduce_mean(cross_entropy) * 100
+tf.scalar_summary('loss', cross_entropy)
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
 accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
+tf.scalar_summary('accuracy', accuracy)
 
 # training step, learning rate = 0.003
 learning_rate = 0.003
 train_step = tf.train.AdamOptimizer(learning_rate).minimize(cross_entropy)
 
 # init
+model_save_dir = gen_model_save_dir(prefix='2_five_layers')
+tf_writer = tf.train.SummaryWriter(model_save_dir)
+tf_saver = tf.train.Saver(max_to_keep=200)  # Arbitrary limit
 init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
 
+merged_summaries = tf.merge_all_summaries()
+tf_writer.add_graph(sess.graph)
 
 # You can call this function in a loop to train the model, 100 images at a time
+
+
 def run(i, update_test_data, update_train_data):
 
     # training on batches of 100 images with 100 labels
@@ -102,7 +112,9 @@ def run(i, update_test_data, update_train_data):
 
     # compute training values for visualisation
     if update_train_data:
-        a, c = sess.run([accuracy, cross_entropy], {X: batch_X, Y_: batch_Y})
+        a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], {
+                           X: batch_X, Y_: batch_Y})
+        tf_writer.add_summary(s, i)
         print(str(i) + ": accuracy:" + str(a) + " loss: " +
               str(c) + " (lr:" + str(learning_rate) + ")")
 
@@ -128,6 +140,7 @@ def run(i, update_test_data, update_train_data):
 def main():
     for k in range(2000):
         run(k + 1, True, True)
+    tf_saver.save(sess, '%s/model.ckpt' % model_save_dir)
 
 if __name__ == '__main__':
     main()

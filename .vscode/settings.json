@@ -11,6 +11,7 @@
     ],
     "python.formatting.provider": "autopep8",
     "files.exclude": {
-        "**/*.pyc": true
+        "**/*.pyc": true,
+        "**/__pycache__": true
     }
 }
