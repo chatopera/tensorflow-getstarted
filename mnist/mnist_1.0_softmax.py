@@ -18,6 +18,7 @@
 
 
 import tensorflow as tf
+from tqdm import tqdm
 from utils import gen_model_save_dir
 from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 tf.set_random_seed(0)
@@ -106,31 +107,39 @@ def run(i, update_test_data, update_train_data):
         a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], feed_dict={
                            X: batch_X, Y_: batch_Y})
         tf_writer.add_summary(s, i)
-        print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
+        # print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
     # compute test value
     if update_test_data:
         a, c = sess.run([accuracy, cross_entropy], feed_dict={
                         X: mnist.test.images, Y_: mnist.test.labels})
-        print(str(i) +
-              ": ********* epoch " +
-              str(i *
-                  100 //
-                  mnist.train.images.shape[0] +
-                  1) +
-              " ********* test accuracy:" +
-              str(a) +
-              " test loss: " +
-              str(c))
+        # print(str(i) +
+        #       ": ********* epoch " +
+        #       str(i *
+        #           100 //
+        #           mnist.train.images.shape[0] +
+        #           1) +
+        #       " ********* test accuracy:" +
+        #       str(a) +
+        #       " test loss: " +
+        #       str(c))
 
     # the backpropagation training step
     sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
 
+    return
+
 
 def main():
-    for k in range(2000):
+    pbar = tqdm(range(2000))
+    for k in pbar:
+        epoch = str(k * 100 // mnist.train.images.shape[0] + 1)
+        pbar.set_description('Processing epoch %s' % epoch)
         run(k + 1, True, True)
+    
+    print("Saving model to %s ..." % model_save_dir)
     tf_saver.save(sess, '%s/model.ckpt' % model_save_dir)
+    print("Done.")
 
 if __name__ == '__main__':
     main()
