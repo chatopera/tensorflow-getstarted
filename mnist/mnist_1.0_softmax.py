@@ -1,5 +1,8 @@
 # encoding: UTF-8
 # Copyright 2016 Google.com
+# https://github.com/martin-gorner/tensorflow-mnist-tutorial
+#
+# Modifications copyright (C) 2017 Hai Liang Wang
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +16,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+
 import tensorflow as tf
+from utils import gen_model_save_dir
 from tensorflow.contrib.learn.python.learn.datasets.mnist import read_data_sets
 tf.set_random_seed(0)
 
@@ -78,14 +83,16 @@ tf.scalar_summary('accuracy', accuracy)  # Keep track of the cost
 train_step = tf.train.GradientDescentOptimizer(0.005).minimize(cross_entropy)
 
 # init
-tf_writer = tf.train.SummaryWriter('./save')
-tf_saver = tf.train.Saver(max_to_keep=200) # Arbitrary limit
+model_save_dir = gen_model_save_dir(prefix='1_softmax')
+tf_writer = tf.train.SummaryWriter(model_save_dir)
+tf_saver = tf.train.Saver(max_to_keep=200)  # Arbitrary limit
 init = tf.initialize_all_variables()
 sess = tf.Session()
 sess.run(init)
 
 merged_summaries = tf.merge_all_summaries()
-tf_writer.add_graph(sess.graph) 
+tf_writer.add_graph(sess.graph)
+
 
 def run(i, update_test_data, update_train_data):
     '''
@@ -96,7 +103,8 @@ def run(i, update_test_data, update_train_data):
 
     # compute training values
     if update_train_data:
-        a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], feed_dict= {X: batch_X, Y_: batch_Y})
+        a, c, s = sess.run([accuracy, cross_entropy, merged_summaries], feed_dict={
+                           X: batch_X, Y_: batch_Y})
         tf_writer.add_summary(s, i)
         print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c))
 
@@ -104,16 +112,25 @@ def run(i, update_test_data, update_train_data):
     if update_test_data:
         a, c = sess.run([accuracy, cross_entropy], feed_dict={
                         X: mnist.test.images, Y_: mnist.test.labels})
-        print(str(i) + ": ********* epoch " + str(i * 100 // mnist.train.images.shape[
-              0] + 1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
+        print(str(i) +
+              ": ********* epoch " +
+              str(i *
+                  100 //
+                  mnist.train.images.shape[0] +
+                  1) +
+              " ********* test accuracy:" +
+              str(a) +
+              " test loss: " +
+              str(c))
 
     # the backpropagation training step
     sess.run(train_step, feed_dict={X: batch_X, Y_: batch_Y})
 
+
 def main():
     for k in range(2000):
         run(k + 1, True, True)
-    tf_saver.save(sess, './save/model.ckpt')
+    tf_saver.save(sess, '%s/model.ckpt' % model_save_dir)
 
 if __name__ == '__main__':
     main()

@@ -1,5 +1,8 @@
 # encoding: UTF-8
 # Copyright 2016 Google.com
+# https://github.com/martin-gorner/tensorflow-mnist-tutorial
+#
+# Modifications copyright (C) 2017 Hai Liang Wang
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -31,21 +34,25 @@ tf.set_random_seed(0)
 #      \x/               -- fully connected layer (softmax)      W5 [30, 10]        B5[10]
 #       ·                                                        Y5 [batch, 10]
 
-# Download images and labels into mnist.test (10K images+labels) and mnist.train (60K images+labels)
+# Download images and labels into mnist.test (10K images+labels) and
+# mnist.train (60K images+labels)
 mnist = read_data_sets("MNIST_data", one_hot=True,
                        reshape=False, validation_size=0)
-# input X: 28x28 grayscale images, the first dimension (None) will index the images in the mini-batch
+# input X: 28x28 grayscale images, the first dimension (None) will index
+# the images in the mini-batch
 X = tf.placeholder(tf.float32, [None, 28, 28, 1])
 # correct answers will go here
 Y_ = tf.placeholder(tf.float32, [None, 10])
 
-# five layers and their number of neurons (tha last layer has 10 softmax neurons)
+# five layers and their number of neurons (tha last layer has 10 softmax
+# neurons)
 L = 200
 M = 100
 N = 60
 O = 30
 # Weights initialised with small random values between -0.2 and +0.2
-# When using RELUs, make sure biases are initialised with small *positive* values for example 0.1 = tf.ones([K])/10
+# When using RELUs, make sure biases are initialised with small *positive*
+# values for example 0.1 = tf.ones([K])/10
 W1 = tf.Variable(tf.truncated_normal([784, L], stddev=0.1))  # 784 = 28 * 28
 B1 = tf.Variable(tf.zeros([L]))
 W2 = tf.Variable(tf.truncated_normal([L, M], stddev=0.1))
@@ -69,8 +76,9 @@ Y = tf.nn.softmax(Ylogits)
 # cross-entropy loss function (= -sum(Y_i * log(Yi)) ), normalised for batches of 100  images
 # TensorFlow provides the softmax_cross_entropy_with_logits function to avoid numerical stability
 # problems with log(0) which is NaN
-cross_entropy = tf.nn.softmax_cross_entropy_with_logits(logits=Ylogits, labels=Y_)
-cross_entropy = tf.reduce_mean(cross_entropy)*100
+cross_entropy = tf.nn.softmax_cross_entropy_with_logits(
+    logits=Ylogits, labels=Y_)
+cross_entropy = tf.reduce_mean(cross_entropy) * 100
 
 # accuracy of the trained model, between 0 (worst) and 1 (best)
 correct_prediction = tf.equal(tf.argmax(Y, 1), tf.argmax(Y_, 1))
@@ -95,15 +103,27 @@ def run(i, update_test_data, update_train_data):
     # compute training values for visualisation
     if update_train_data:
         a, c = sess.run([accuracy, cross_entropy], {X: batch_X, Y_: batch_Y})
-        print(str(i) + ": accuracy:" + str(a) + " loss: " + str(c) + " (lr:" + str(learning_rate) + ")")
-    
+        print(str(i) + ": accuracy:" + str(a) + " loss: " +
+              str(c) + " (lr:" + str(learning_rate) + ")")
+
     # compute test values for visualisation
     if update_test_data:
-        a, c = sess.run([accuracy, cross_entropy], {X: mnist.test.images, Y_: mnist.test.labels})
-        print(str(i) + ": ********* epoch " + str(i*100//mnist.train.images.shape[0]+1) + " ********* test accuracy:" + str(a) + " test loss: " + str(c))
+        a, c = sess.run([accuracy, cross_entropy], {
+                        X: mnist.test.images, Y_: mnist.test.labels})
+        print(str(i) +
+              ": ********* epoch " +
+              str(i *
+                  100 //
+                  mnist.train.images.shape[0] +
+                  1) +
+              " ********* test accuracy:" +
+              str(a) +
+              " test loss: " +
+              str(c))
 
     # the backpropagation training step
     sess.run(train_step, {X: batch_X, Y_: batch_Y})
+
 
 def main():
     for k in range(2000):
