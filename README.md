@@ -11,5 +11,5 @@ TensorFlow’s high-level machine learning API (tf.contrib.learn) makes it easy 
 ## Logging and Monitoring Basics
 When training a model, it’s valuable to track and evaluate progress in real time.
 
-# About US
-[Engineering](http://eng.snaplingo.net)
+# About me
+[Blog](http://blog.chatbot.io)
